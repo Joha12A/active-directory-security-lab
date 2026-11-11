@@ -1,0 +1,25 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# VirtualBox artifacts
+*.vdi
+*.vmdk
+*.vmsd
+*.vmx
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+*.orig
+
+# Local environment files
+.env
+.env.*
