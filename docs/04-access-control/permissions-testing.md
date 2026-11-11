@@ -1,5 +1,7 @@
 # Validation des permissions d'accès
 
+[Accueil du laboratoire](../README.md) · [Accueil du dépôt](../../README.md)
+
 ## 1. Objectif
 
 Le but de cette validation est de confirmer que les droits d'accès au partage réseau `\\SRV-DC01\IT` sont correctement appliqués et respectent le principe du moindre privilège. La vérification doit démontrer que :
@@ -17,15 +19,14 @@ Les deux comptes utilisés pour la validation sont :
 - `lab\smartin` — Sarah Martin, membre du service Marketing ;
 - `lab\lbernard` — Lucas Bernard, membre du service IT.
 
-## 3. Modèle de sécurité appliqué
+## 3. Configuration visible et résultat attendu
 
-Le partage `IT` a été configuré avec une logique stricte :
+Les captures de configuration montrent :
 
-- le groupe `GRP_IT` reçoit les droits nécessaires sur le partage ;
-- le groupe `GRP_IT` est l'unique groupe autorisé à accéder au dossier ;
-- les permissions NTFS et SMB ont été définies pour éviter toute ouverture involontaire par un autre service.
+- `GRP_IT` dans la liste des autorisations du partage SMB ;
+- `GRP_IT` avec `Contrôle total` dans l’ACL NTFS, ainsi que d’autres entrées, dont `Utilisateurs`.
 
-Cette configuration vise à garantir la confidentialité des ressources informatiques et à limiter les risques de fuite de données ou d'accès non autorisé.
+Le résultat attendu des tests est un accès pour Lucas (IT) et un refus pour Sarah (Marketing). L’ACL NTFS affichée doit être examinée pour déterminer les droits effectifs ; la capture ne permet pas de dire que `GRP_IT` est le seul principal autorisé au niveau du système de fichiers.
 
 ## 4. Procédure de test
 
@@ -47,8 +48,9 @@ Cette configuration vise à garantir la confidentialité des ressources informat
 
 ### Analyse détaillée
 
-- Le compte `lab\smartin` ne dispose pas des autorisations nécessaires sur le partage réseau. Le système a refusé l'accès, ce qui confirme que les permissions sont bien appliquées au niveau du partage et des droits NTFS.
-- Le compte `lab\lbernard`, membre du groupe `GRP_IT`, a pu accéder au dossier partagé et effectuer une action d'écriture. Cela valide la bonne configuration des droits de sécurité et de partage.
+- La capture de Sarah Martin montre un refus d’accès à `\\SRV-DC01\IT`.
+- La capture de Lucas Bernard montre l’ouverture du partage et un fichier de test. Ces observations confirment les résultats visibles à la date des captures, mais ne permettent pas d’isoler à elles seules la couche qui a refusé l’accès ni de déduire tous les droits effectifs.
+- La capture NTFS contient d’autres entrées que `GRP_IT`, dont `Utilisateurs`. Voir la [configuration du partage](shared-folders.md) et contrôler l’accès effectif avant de conclure que l’ACL NTFS est minimale.
 
 ## 6. Captures d'écran
 
@@ -60,18 +62,20 @@ Cette configuration vise à garantir la confidentialité des ressources informat
 
 ## 7. Interprétation de la mise en œuvre
 
-Ces tests montrent que les autorisations ne sont pas seulement théoriques : elles sont réellement appliquées dans le système. La séparation des accès entre départements est donc effective, ce qui est essentiel pour sécuriser les ressources internes de l'entreprise.
+Ces captures documentent un résultat positif pour Lucas et un refus pour Sarah lors des essais. Elles ne constituent pas une revue exhaustive des ACL, des groupes imbriqués ou des droits d’autres utilisateurs.
 
 Ce type de validation est particulièrement important en environnement de production, car il permet de confirmer que les permissions ne dépendent pas seulement de la structure AD, mais qu'elles sont effectivement respectées lors des accès réseau.
 
 ## 8. Résultat obtenu
 
-Le cloisonnement de données est bien fonctionnel. Le service IT dispose des droits nécessaires au bon fonctionnement de son espace de travail partagé, tandis que les autres services ne peuvent pas accéder aux ressources informatiques sensibles.
+Les résultats visibles sont cohérents avec le cloisonnement attendu pour les deux comptes testés. La conformité générale du partage reste à confirmer après revue des ACL effectives et des groupes de chaque compte.
 
 ## 9. Difficultés rencontrées
 
-Une difficulté de cache d'authentification a été observée sur le poste client pendant les premiers essais. Le problème a été résolu en redémarrant le client Windows 10 afin de forcer la mise à jour des informations d'authentification Kerberos et des jetons de session.
+Une difficulté de cache d'authentification est rapportée pendant les premiers essais, suivie d’un redémarrage du client. La cause n’est pas démontrée par les preuves conservées ; ne pas l’attribuer spécifiquement à Kerberos sans journaux ou sortie de diagnostic.
 
 ## 10. Conclusion
 
 Cette validation confirme la pertinence de la mise en place d'Active Directory comme mécanisme centralisé de gestion des droits. Les groupes de sécurité, associés aux permissions NTFS et SMB, permettent d'adopter un modèle d'accès robuste, lisible et facilement auditable, conforme aux bonnes pratiques de sécurité informatique.
+
+[Configuration du partage](shared-folders.md) · [Retour à l’index](../README.md)

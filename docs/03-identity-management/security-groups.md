@@ -1,5 +1,7 @@
 # Groupes de sécurité
 
+[Accueil du laboratoire](../README.md) · [Accueil du dépôt](../../README.md)
+
 ## 1. Objectif
 
 La gestion des autorisations dans Active Directory repose fortement sur les groupes de sécurité. L'objectif de cette étape est de regrouper les utilisateurs selon leur service ou leur rôle afin de simplifier l'attribution des droits et d'appliquer le principe du moindre privilège.
@@ -10,14 +12,16 @@ Une fois les unités d'organisation créées, il est nécessaire d'associer les 
 
 ## 3. Configuration réalisée
 
-Les groupes de sécurité suivants ont été créés :
+Les groupes suivants sont mentionnés dans les notes du laboratoire :
 
 | Nom du groupe | OU de rattachement | Membres |
 | :--- | :--- | :--- |
 | `GRP_IT` | `IT` | Lucas Bernard (`lbernard`) |
 | `GRP_RH` | `RH` | Jean Dupont (`jdupont`) |
 | `GRP_Marketing` | `Marketing` | Sarah Martin (`smartin`) |
-| `GRP_Compta` | `Comptabilité` | Thomas Moreau (`tmoreau`) |
+| `GRP_COMPTA` | `Comptabilité` | Thomas Moreau (`tmoreau`) |
+
+Cette liste reflète les rattachements annoncés dans les notes. Les captures disponibles confirment la création de `GRP_COMPTA` en groupe global de sécurité et l’ajout de `tmoreau`, mais montrent `lab.local/Users` comme emplacement du groupe et de Thomas Moreau. Elles ne confirment donc pas leur placement dans l’OU `Comptabilité`, ni la création des autres groupes de la liste.
 
 ## 4. Justification du choix
 
@@ -28,14 +32,14 @@ Les groupes de sécurité sont un mécanisme fondamental en AD. Ils permettent d
 - faciliter les changements de responsabilités au sein de l'entreprise ;
 - sécuriser les ressources en limitant les privilèges au strict nécessaire.
 
-En pratique, un groupe agit comme un conteneur d'utilisateurs ou d'ordinateurs auquel on attribue ensuite des droits.
+Un groupe regroupe des comptes et peut être utilisé comme principal de sécurité auquel des autorisations sont attribuées. Il ne remplace ni les OU ni les règles de délégation.
 
-## 5. Procédure de création (exemple : `GRP_Compta`)
+## 5. Procédure de création (exemple : `GRP_COMPTA`)
 
 1. Ouvrir la console **Utilisateurs et ordinateurs Active Directory**.
-2. Sélectionner l'OU `Comptabilité`.
+2. Sélectionner l’OU `Comptabilité` avant la création. La capture actuelle montre le conteneur par défaut `Users` ; le placement de l’objet doit être contrôlé.
 3. Cliquer avec le bouton droit > **Nouveau** > **Groupe**.
-4. Saisir le nom du groupe : `GRP_Compta`.
+4. Saisir le nom du groupe : `GRP_COMPTA`.
 5. Définir la portée sur **Globale** et le type sur **Sécurité**.
 6. Valider la création.
 7. Ouvrir les propriétés du groupe.
@@ -47,16 +51,18 @@ Cette procédure est reproductible pour chaque équipe ou service de l'entrepris
 
 ## 6. Captures d'écran
 
-**Figure 1 — Création du groupe de sécurité dans l'OU Comptabilité**
-![Création du groupe GRP_Compta](../../screenshots/03-identity-management/group-creation-wizard.png)
+**Figure 1 — Création du groupe global de sécurité ; le chemin affiché est `lab.local/Users`**
+![Création du groupe GRP_COMPTA dans le conteneur Users](../../screenshots/03-identity-management/group-creation-wizard.png)
 
-**Figure 2 — Ajout du membre Thomas Moreau au groupe de sécurité**
-![Membres GRP_Compta](../../screenshots/03-identity-management/group-membership-compta.png)
+**Figure 2 — Membre affiché dans le groupe ; son emplacement indiqué est `lab.local/Users`**
+![Membres du groupe GRP_COMPTA](../../screenshots/03-identity-management/group-membership-compta.png)
 
 ## 7. Résultat obtenu
 
-Les utilisateurs sont désormais associés à des groupes de sécurité adaptés à leur service. Cela permet d'initier la logique de gestion des permissions au niveau du domaine, avant d'aller plus loin vers les accès aux fichiers, partages, services et contrôles d'administration.
+Les captures prouvent que `GRP_COMPTA` et son membre `tmoreau` existent. Leur emplacement visible dans `Users` diffère de l’OU annoncée ; le placement doit être corrigé ou expliqué avant de conclure que l’organisation est conforme. L’appartenance à un groupe ne prouve pas, à elle seule, l’accès effectif à une ressource.
 
 ## 8. Conclusion
 
-La mise en place de groupes de sécurité est une étape clé dans la mise en œuvre d'un environnement Active Directory sécurisé. Elle réduit la complexité de gestion des autorisations et renforce le modèle de contrôle d'accès au sein de l'entreprise.
+La mise en place de groupes de sécurité est une étape clé dans la gestion des autorisations AD. Leur portée, leurs membres, leur emplacement et leurs droits effectifs doivent être vérifiés ensemble.
+
+[Utilisateurs](user-management.md) · [Tests d’accès](../04-access-control/permissions-testing.md) · [Retour à l’index](../README.md)

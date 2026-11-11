@@ -1,5 +1,7 @@
 # Organisation des unités d'organisation (OU)
 
+[Accueil du laboratoire](../README.md) · [Accueil du dépôt](../../README.md)
+
 ## 1. Objectif
 
 L'objectif de cette étape est de structurer le domaine Active Directory de TechCorp de manière logique et exploitable. La création d'unités d'organisation (OU) permet de séparer les différents services de l'entreprise, de mieux administrer les comptes et de préparer l'application de politiques de sécurité et de gestion centralisées.
@@ -29,7 +31,9 @@ Cette organisation reflète les départements fonctionnels de l'entreprise et pe
 
 ## 4. Justification de l'organisation
 
-La création des OU n'est pas seulement esthétique. Elle répond à des objectifs de sécurité et d'administration :
+Les OU améliorent l’organisation et le ciblage administratif. Une OU n’est pas, à elle seule, une frontière de sécurité ni un mécanisme empêchant un service d’accéder aux objets d’un autre service. Les délégations et autorisations doivent être configurées et vérifiées séparément.
+
+Les objectifs d’administration sont les suivants :
 
 - un service ne doit pas manipuler les objets d'un autre service sans raison valable ;
 - les comptes et groupes peuvent être regroupés selon leur contexte métier ;
@@ -54,8 +58,10 @@ Cette méthode permet de conserver une arborescence stable et de réduire les ri
 
 ## 7. Résultat obtenu
 
-L'annuaire Active Directory dispose désormais d'une structure logique et cohérente. Les comptes, groupes et ressources peuvent être rattachés à des services métiers précis, ce qui facilite la gestion administrative et prépare le terrain pour les tests de permissions, la mise en place des groupes de sécurité et l'application des GPO.
+La capture montre `Entreprise_Lab` et les OU `IT`, `RH`, `Marketing` et `Comptabilité`. Elle confirme la structure des OU, mais ne démontre pas à elle seule que les comptes et groupes sont placés dans les OU attendues. Les captures des [utilisateurs](user-management.md) et des [groupes](security-groups.md) doivent être rapprochées de cette structure.
 
 ## 8. Conclusion
 
 Cette étape constitue la base de l'organisation de l'annuaire. Elle permet d'aligner la structure AD sur l'organigramme de l'entreprise, ce qui est indispensable pour mettre en place un modèle de sécurité robuste et facilement auditable.
+
+[Utilisateurs](user-management.md) · [Groupes](security-groups.md) · [Retour à l’index](../README.md)

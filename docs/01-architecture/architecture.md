@@ -1,42 +1,61 @@
 # Architecture de l'infrastructure
 
+[Accueil du laboratoire](../README.md) · [Accueil du dépôt](../../README.md)
+
 ## 1. Objectif
 
-Ce document a pour but de décrire l'architecture technique du laboratoire Active Directory mis en place pour l'entreprise fictive **TechCorp**. Il détaille l'environnement de virtualisation, la topologie réseau et la répartition des rôles sur les différentes machines virtuelles.
+Décrire l’environnement VirtualBox, les machines connues et les éléments de réseau visibles dans les preuves du laboratoire TechCorp.
 
 ## 2. Contexte technique
 
-Le laboratoire est hébergé sur une machine physique sous **Kali Linux**, utilisant **Oracle VirtualBox** comme hyperviseur. L'infrastructure repose sur un réseau isolé, garantissant que les tests de sécurité et de configuration restent confinés à l'environnement de laboratoire.
+Les notes identifient Kali Linux comme hôte d’administration et Oracle VirtualBox comme hyperviseur. Les captures montrent des interfaces attachées à un réseau interne `labnet` et au NAT. Ces éléments ne prouvent pas à eux seuls que l’hôte Kali ou toutes les VMs peuvent communiquer entre eux.
 
-## 3. Configuration réalisée
+## 3. Machines et état des preuves
 
-L'infrastructure se compose de trois machines virtuelles principales :
+| Machine | Système / rôle | État vérifiable |
+|---|---|---|
+| `SRV-DC01` | Windows Server 2025 Datacenter Evaluation, version 24H2 visible sur capture ; AD DS et DNS | Capture système disponible ; adresse `192.168.56.10` visible. Un test de connectivité `dcdiag` échoue, voir ci-dessous. |
+| `CLIENT-W10` | Windows 10 ; client de `lab.local` selon les notes et captures | Capture système disponible. Son adresse IP et l’accès courant au contrôleur restent à revalider. |
+| `Ubuntu-Server` | VM Ubuntu présente dans l’inventaire VirtualBox | La capture montre la VM arrêtée ; rôle et réseau non vérifiés. |
 
-| Nom de la VM | Système d'exploitation | Rôle principal | Adresse IP |
-| :--- | :--- | :--- | :--- |
-| `SRV-DC01` | Windows Server | Contrôleur de domaine (AD DS) et DNS | `192.168.56.10` |
-| `CLIENT-W10` | Windows 10 | Poste client joint au domaine | `192.168.56.20` |
-| `Ubuntu-Server` | Ubuntu Server | Serveur Linux (intégration future) | `192.168.56.30` |
+Une capture des paramètres VirtualBox montre deux interfaces sur les VMs Windows : `Internal Network (labnet)` et NAT. La capture IP du contrôleur montre `192.168.56.10/24` et un DNS préféré `127.0.0.1`. La communication de Kali avec le réseau interne n’est pas démontrée.
 
-*(Note : La machine hôte Kali Linux est également utilisée pour l'administration et les futurs audits de sécurité).*
+## 4. Schéma logique
 
-## 4. Procédure (Vue d'ensemble)
+```mermaid
+flowchart TB
+    HOST["Hôte Kali Linux"]
+    VBOX["Oracle VirtualBox"]
+    HOST --- VBOX
 
-1. Création des machines virtuelles dans VirtualBox.
-2. Configuration de deux adaptateurs réseau par VM (un pour le réseau interne `labnet`, un pour le NAT).
-3. Attribution des adresses IP statiques sur le réseau `192.168.56.0/24`.
-4. Configuration du service DNS sur `SRV-DC01` (pointant vers lui-même).
+    subgraph LAB["Internal Network : labnet"]
+        DC["SRV-DC01<br/>Windows Server 2025<br/>AD DS + DNS<br/>192.168.56.10 visible"]
+        CLIENT["CLIENT-W10<br/>Windows 10<br/>Adresse à revalider"]
+        UBUNTU["Ubuntu-Server<br/>VM arrêtée sur capture<br/>Rôle non vérifié"]
+    end
 
-## 5. Vérifications
+    NAT["NAT VirtualBox"]
+    VBOX --- LAB
+    DC -. "seconde interface observée" .-> NAT
+    CLIENT -. "seconde interface observée" .-> NAT
+```
 
-La connectivité réseau a été vérifiée via des requêtes `ping` entre les différentes machines. La machine cliente `CLIENT-W10` parvient à résoudre le nom de domaine `lab.local` et à contacter le contrôleur de domaine.
+Le schéma raster historique est conservé comme illustration conceptuelle, non comme source de vérité pour l’état des VMs ou des adresses :
+
+![Illustration conceptuelle initiale du réseau — les états et adresses doivent être vérifiés séparément](../../screenshots/01-architecture/network-topology.jpg)
+
+## 5. Vérifications et limites observées
+
+La capture `dcdiag` consignée comme état du contrôleur montre un échec au test initial de connectivité : un nom GUID sous `_msdcs.lab.local` ne peut pas être résolu. Une autre capture de la zone DNS montre pour `SRV-DC01` les adresses `192.168.56.10` et `10.0.3.15`. La seconde adresse doit être corrélée avec les interfaces et la réponse réellement reçue par le client.
+
+Les notes indiquent que des tests de ping et de résolution ont été réalisés, mais aucune sortie datée n’est fournie. Ces contrôles sont à rejouer avant de déclarer l’environnement pleinement opérationnel.
 
 ## 6. Captures d'écran
 
-**Figure 1 — Vue d'ensemble des machines virtuelles dans VirtualBox**
+**Figure 1 — Inventaire VirtualBox ; Ubuntu apparaît arrêtée**
 ![Vue d'ensemble VirtualBox](../../screenshots/01-architecture/virtualbox-vm-overview.png)
 
-**Figure 2 — Configuration réseau d'une machine virtuelle**
+**Figure 2 — Interfaces configurées sur la VM**
 ![Configuration réseau VirtualBox](../../screenshots/01-architecture/virtualbox-network-settings.png)
 
 **Figure 3 — Informations système du serveur `SRV-DC01`**
@@ -45,14 +64,17 @@ La connectivité réseau a été vérifiée via des requêtes `ping` entre les d
 **Figure 4 — Informations système du client `CLIENT-W10`**
 ![Informations système CLIENT-W10](../../screenshots/01-architecture/client-w10-system-information.png)
 
-## 7. Résultat obtenu
+**Figure 5 — Échec du test initial de connectivité dans `dcdiag`**
+![Échec de résolution d'un nom GUID sous _msdcs.lab.local](../../screenshots/02-active-directory/domain-controller-status.png)
 
-L'infrastructure virtuelle est opérationnelle. Les trois machines communiquent correctement sur le réseau interne `labnet`, et l'accès à Internet est maintenu via les cartes NAT, permettant les mises à jour système.
+## 7. Résultat et statut
 
-## 8. Difficultés rencontrées
+**Partiellement documenté, connectivité à revalider.** Les captures prouvent la présence des VMs Windows et les interfaces configurées ; elles ne prouvent pas la connectivité complète. L’échec observé dans `dcdiag` et les enregistrements DNS multihomés doivent être investigués avant toute conclusion sur l’état du domaine.
 
-Lors de la configuration initiale, un problème d'ordre d'amorçage a été rencontré sur la VM Windows 10 (l'ISO d'installation se relançait en boucle). Ce problème a été résolu en modifiant l'ordre de démarrage dans VirtualBox et en retirant le lecteur optique virtuel après l'installation.
+Lors de la configuration initiale, un problème d’ordre d’amorçage de la VM Windows 10 est rapporté comme résolu en modifiant l’ordre de démarrage et en retirant le lecteur optique virtuel. Cette difficulté est issue des notes du laboratoire.
 
-## 9. Conclusion
+## 8. Conclusion
 
-Cette première phase a permis de poser les fondations d'un environnement Active Directory isolé et fonctionnel. La topologie réseau est prête à accueillir les services de domaine et les tests de sécurité.
+L’environnement documenté fournit une base de laboratoire, mais la disponibilité des services doit être confirmée par des tests reproductibles. Ne pas considérer les adresses du schéma historique ou l’état « en fonction » d’une VM comme preuve de résolution DNS ou de connectivité entre hôtes.
+
+[Installation AD DS](../02-active-directory/adds-installation.md) · [Retour à l’index](../README.md)

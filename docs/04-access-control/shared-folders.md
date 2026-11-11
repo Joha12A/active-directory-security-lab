@@ -1,5 +1,7 @@
 # Création et sécurisation d'un partage réseau
 
+[Accueil du laboratoire](../README.md) · [Accueil du dépôt](../../README.md)
+
 ## 1. Objectif
 
 Cette étape vise à mettre en place un espace de stockage réseau dédié au service informatique de TechCorp, tout en limitant strictement l'accès à ce dossier aux seuls utilisateurs autorisés. Le partage est conçu pour refléter un cas d'usage réaliste d'administration système, avec un contrôle d'accès basé sur les groupes Active Directory.
@@ -17,11 +19,11 @@ Le partage est destiné à l'équipe informatique et doit rester inaccessible au
 | Dossier physique | `C:\Partages\IT` |
 | Partage réseau UNC | `\\SRV-DC01\IT` |
 | Groupe autorisé | `GRP_IT` |
-| Partage SMB | Sécurisé, accès limité au groupe `GRP_IT` |
-| Permissions NTFS | `Modification` et `Écriture` pour le groupe `GRP_IT` |
-| Groupe par défaut supprimé | `Everyone` |
+| Partage SMB | La capture des autorisations montre `GRP_IT` ; l’accès effectif est évalué dans le document de tests |
+| Permissions NTFS visibles | La capture montre `GRP_IT` avec `Contrôle total`, ainsi que d’autres entrées, dont `Utilisateurs` |
+| Permissions de partage visibles | La capture montre `GRP_IT` avec `Contrôle total` |
 
-La suppression du groupe `Everyone` est un choix de sécurité important. En effet, ce type d'autorisation permettrait à des utilisateurs non explicitement autorisés d'essayer d'accéder au partage, ce qui est contraire au principe du moindre privilège.
+La capture des permissions de partage ne montre que `GRP_IT`. Elle ne permet pas de confirmer qu’une entrée `Everyone` a été supprimée auparavant. Sur NTFS, l’entrée `Utilisateurs` et le `Contrôle total` accordé à `GRP_IT` doivent être examinés selon le besoin réel ; pour des utilisateurs, `Modification` est généralement préférable à `Contrôle total`, qui permet aussi de gérer les autorisations.
 
 ## 4. Justification de la configuration
 
@@ -45,11 +47,11 @@ Les deux doivent être correctement alignées pour garantir un modèle de sécur
 2. Ouvrir les propriétés du dossier.
 3. Accéder à l'onglet **Partage**.
 4. Cliquer sur **Partage avancé** puis sur **Autorisations**.
-5. Supprimer le groupe `Everyone` pour éviter tout accès non autorisé.
+5. Vérifier la liste des autorisations de partage et retirer toute entrée non justifiée ; la capture conservée montre `GRP_IT`.
 6. Ajouter le groupe `GRP_IT` avec le niveau **Contrôle total** au niveau du partage.
 7. Ouvrir l'onglet **Sécurité** du dossier.
 8. Ajouter le groupe `GRP_IT`.
-9. Définir les droits NTFS nécessaires, notamment **Modification** et **Écriture**.
+9. Accorder au groupe les droits NTFS minimaux nécessaires, normalement **Modification** pour l’écriture de fichiers, plutôt que **Contrôle total**.
 10. Vérifier que les accès sont bien restreints au groupe informatique.
 
 ## 6. Vérifications de configuration
@@ -74,7 +76,7 @@ Avant de tester les droits par le client, il est important de vérifier que :
 
 ## 8. Résultat obtenu
 
-Le partage `\\SRV-DC01\IT` est désormais disponible et protégé. Seuls les utilisateurs appartenant au groupe `GRP_IT` peuvent accéder au dossier de manière conforme aux exigences de sécurité du lab.
+La capture confirme le partage `\\SRV-DC01\IT` et une autorisation de partage `GRP_IT`. Les captures NTFS montrent une ACL plus large que celle décrite initialement ; la revue des droits effectifs et l’ajustement du `Contrôle total` sont à réaliser avant de conclure que l’accès est limité au strict nécessaire.
 
 ## 9. Difficultés rencontrées et points de vigilance
 
@@ -88,3 +90,5 @@ Il est donc essentiel de valider les deux niveaux de sécurité afin d'éviter l
 ## 10. Conclusion
 
 La création d'un partage sécurisé est une étape fondamentale dans un environnement Active Directory. En associant les permissions à des groupes de sécurité et en appliquant des règles strictes sur le système de fichiers, il est possible de mettre en place un modèle de stockage fiable, lisible et adapté à la sécurité d'entreprise.
+
+[Tests d’accès](permissions-testing.md) · [Groupes](../03-identity-management/security-groups.md) · [Retour à l’index](../README.md)

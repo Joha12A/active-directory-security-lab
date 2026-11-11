@@ -1,6 +1,8 @@
 
 # Sécurisation de l'infrastructure DNS avec DNSSEC
 
+[Accueil du laboratoire](../README.md) · [Accueil du dépôt](../../README.md)
+
 > **Projet :** Infrastructure Active Directory — TechCorp  
 > **Serveur DNS :** SRV-DC01  
 > **Zone DNS :** `lab.local`  
@@ -142,7 +144,7 @@ Invoke-DnsServerZoneSign -ZoneName "lab.local" -SignWithDefault -Force
 - `-SignWithDefault` : utilise les paramètres de signature par défaut.
 - `-Force` : autorise l'exécution sans demander certaines confirmations interactives.
 
-La configuration par défaut détermine les paramètres cryptographiques et les clés utilisés. Il est recommandé de vérifier les paramètres réellement appliqués plutôt que de supposer automatiquement un algorithme ou une taille de clé particulière.
+La documentation Microsoft précise que cette option signe une zone non signée avec une KSK et une ZSK suivant les paramètres par défaut. Vérifier l’état avant toute exécution : une re-signature d’une zone déjà signée est une opération distincte (`-DoResign`) et ne doit pas être déclenchée sans plan de changement et sauvegarde.
 
 ### 5.4. Vérification de l'état de signature
 
@@ -202,6 +204,8 @@ Cette configuration concerne le rôle de résolveur du serveur et ne signifie pa
 
 Il faut également distinguer la validation des réponses DNS externes de la signature de la zone interne `lab.local`.
 
+La capture des enregistrements de zone montre les adresses `192.168.56.10` et `10.0.3.15` pour `SRV-DC01`. Dans un serveur doté de plusieurs interfaces, vérifier quels enregistrements sont publiés et quelle adresse est renvoyée aux clients avant de conclure que la résolution est correcte.
+
 ## 7. Vérifications et contrôles
 
 Les contrôles suivants permettent d'évaluer le fonctionnement de la configuration.
@@ -237,19 +241,19 @@ Les captures suivantes documentent les principales étapes de configuration.
 
 Présentation de la configuration de validation DNSSEC dans les propriétés du serveur DNS.
 
-![Activation de la validation DNSSEC](../screenshots/06-dns-security/dnssec-validation-settings.png)
+![Activation de la validation DNSSEC](../../screenshots/06-dns-security/dnssec-validation-settings.png)
 
-### Figure 2 — Signature de la zone lab.local
+### Figure 2 — Paramètres DNSSEC de la zone `lab.local`
 
-Exécution de la commande PowerShell permettant de signer la zone DNS.
+La capture montre les paramètres du maître de clés et leur état, pas l’exécution de la commande PowerShell.
 
-![Signature de la zone lab.local](../screenshots/06-dns-security/dnssec-zone-signing.png)
+![Paramètres de clés DNSSEC de la zone lab.local](../../screenshots/06-dns-security/dnssec-key-settings.png)
 
-### Figure 3 — Vérification de l'état de signature
+### Figure 3 — Enregistrements DNSSEC visibles dans la zone
 
-Affichage du résultat `IsSigned : True`, confirmant que la zone est signée.
+La capture DNS affiche notamment des enregistrements `RRSIG` et `NSEC3`. Elle documente la présence d’enregistrements de signature, mais ne montre pas la sortie de `Get-DnsServerZone` ni un résultat de validation côté client.
 
-![Statut de signature DNSSEC](../screenshots/06-dns-security/dnssec-validation-status.png)
+![Enregistrements RRSIG et NSEC3 de la zone](../../screenshots/06-dns-security/dnssec-signed-records.png)
 
 ### Figure 4 — Vérification des enregistrements DNSSEC
 
@@ -262,7 +266,7 @@ Get-DnsServerResourceRecord -ZoneName "lab.local" -RRType DNSKEY
 Get-DnsServerResourceRecord -ZoneName "lab.local" -RRType RRSIG
 ```
 
-Le résultat attendu est la présence d'un ou plusieurs enregistrements `DNSKEY` et d'un ensemble de signatures `RRSIG` associées aux enregistrements de la zone. La capture de ces éléments n'a pas été ajoutée au dépôt de laboratoire actuel, mais la vérification PowerShell constitue le contrôle de preuve officiel à réaliser lors d'un audit de configuration.
+Le résultat attendu est la présence des enregistrements DNSSEC applicables. La capture conservée montre `RRSIG` et `NSEC3`, mais aucune sortie PowerShell de ces commandes ni capture des `DNSKEY` n’est archivée.
 
 ### Figure 5 — Vérification de la résolution DNS
 
@@ -272,7 +276,7 @@ Le test de résolution DNS depuis un poste client vise à confirmer que la zone 
 nslookup lab.local
 ```
 
-Cette commande permet de vérifier que le nom du domaine interne est bien résolu et que le service DNS conserve son fonctionnement nominal. Le résultat attendu est une réponse valide du serveur DNS, sans erreur de résolution ni interruption de l'accès aux services AD. La capture du test de résolution peut être ajoutée ultérieurement dans le dossier de preuves du laboratoire si une démonstration visuelle est souhaitée.
+Cette commande permet de contrôler la résolution classique du nom, mais pas de prouver à elle seule la validation DNSSEC. Aucune capture du test client n’est présente dans le dépôt. Le statut de validation doit être contrôlé auprès d’un résolveur validant et avec une chaîne de confiance appropriée.
 
 ## 9. Difficultés et points d'attention
 
@@ -290,7 +294,7 @@ Les clés cryptographiques doivent être correctement protégées et renouvelée
 
 La signature d'une zone ne suffit pas à établir automatiquement une chaîne de confiance complète.
 
-Dans le cas de `lab.local`, qui est un domaine interne utilisant un suffixe réservé à l'usage local, il n'existe pas de chaîne de délégation publique classique permettant de remonter vers une racine DNSSEC publique.
+Dans le cas de `lab.local`, le suffixe `.local` est désigné pour l’usage spécial de mDNS (RFC 6762) et ne possède pas de délégation publique DNSSEC classique remontant à la racine.
 
 Une architecture de confiance interne doit donc être étudiée si l'objectif est de valider cryptographiquement cette zone depuis des résolveurs indépendants.
 
@@ -300,15 +304,7 @@ Toute modification DNSSEC doit être suivie de tests de résolution afin de s'as
 
 ## 10. Résultat obtenu
 
-À l'issue de cette opération :
-
-- La zone DNS `lab.local` a été signée.
-- L'état de signature a été vérifié avec `IsSigned : True`.
-- Les mécanismes de signature DNSSEC ont été mis en place.
-- La configuration de validation DNSSEC du serveur a été activée.
-- Les tests de résolution et de connectivité du laboratoire ont été maintenus.
-
-La configuration renforce les mécanismes de sécurité du service DNS de l'infrastructure TechCorp.
+Les preuves visuelles montrent le paramètre de validation DNSSEC des réponses distantes activé sur le serveur et des enregistrements `RRSIG`/`NSEC3` dans `lab.local`. Le texte du laboratoire rapporte également `IsSigned : True`, mais la sortie de cette commande n’est pas archivée. La validation DNSSEC par les clients, la chaîne de confiance interne et la continuité de la résolution AD restent à vérifier ; la capture `dcdiag` disponible signale par ailleurs un échec DNS/DC locator.
 
 ## 11. Conclusion
 
@@ -326,6 +322,12 @@ DNSSEC vient ainsi compléter les autres mesures de sécurisation de l'infrastru
 
 - Microsoft Learn — DNSSEC Overview: https://learn.microsoft.com/en-us/windows-server/networking/dns/dnssec-overview
 - Microsoft Learn — DNS Server PowerShell: https://learn.microsoft.com/en-us/powershell/module/dnsserver/
+- Microsoft Learn — [Invoke-DnsServerZoneSign](https://learn.microsoft.com/en-us/powershell/module/dnsserver/invoke-dnsserverzonesign?view=windowsserver2025-ps)
+- Microsoft Learn — [Get-DnsServerResourceRecord](https://learn.microsoft.com/en-us/powershell/module/dnsserver/get-dnsserverresourcerecord?view=windowsserver2025-ps)
+- Microsoft Learn — [Get-DnsServerDnsSecZoneSetting](https://learn.microsoft.com/en-us/powershell/module/dnsserver/get-dnsserverdnsseczonesetting?view=windowsserver2025-ps)
 - RFC 4033 — DNS Security Introduction and Requirements: https://www.rfc-editor.org/rfc/rfc4033
 - RFC 4034 — Resource Records for DNS Security Extensions: https://www.rfc-editor.org/rfc/rfc4034
 - RFC 4035 — Protocol Modifications for DNS Security Extensions: https://www.rfc-editor.org/rfc/rfc4035
+- RFC 6762 — Multicast DNS (usage spécial du suffixe `.local`) : https://www.rfc-editor.org/rfc/rfc6762
+
+[Résultats d’audit](../07-security-audit/audit-results.md) · [Plan de remédiation](../08-remediation/remediation-plan.md) · [Retour à l’index](../README.md)

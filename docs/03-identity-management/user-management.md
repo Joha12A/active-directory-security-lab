@@ -1,5 +1,7 @@
 # Gestion des utilisateurs
 
+[Accueil du laboratoire](../README.md) · [Accueil du dépôt](../../README.md)
+
 ## 1. Objectif
 
 Cette étape consiste à créer les comptes utilisateur de l'entreprise TechCorp et à les rattacher aux bonnes unités d'organisation. Le but est de représenter un environnement de production réaliste au sein de l'annuaire Active Directory, tout en appliquant une logique de gestion cohérente pour les identités et les accès.
@@ -10,7 +12,7 @@ Après la mise en place du domaine et la définition de la hiérarchie des OU, i
 
 ## 3. Configuration réalisée
 
-Les comptes suivants ont été créés dans le domaine :
+Les comptes suivants sont mentionnés dans les notes du laboratoire :
 
 | Nom complet | Identifiant (Login) | OU de rattachement | Service |
 | :--- | :--- | :--- | :--- |
@@ -19,7 +21,7 @@ Les comptes suivants ont été créés dans le domaine :
 | Jean Dupont | `jdupont` | `RH` | RH |
 | Thomas Moreau | `tmoreau` | `Comptabilité` | Comptabilité |
 
-Chaque compte est associé à son service fonctionnel respectif. Cela permet d'organiser l'annuaire selon l'organisation réelle de l'entreprise et de préparer les tests d'autorisations par groupe.
+La capture de création de Thomas Moreau indique `lab.local/Users` comme emplacement et non l’OU `Comptabilité` annoncée. Les captures ne permettent pas de vérifier individuellement le placement des quatre comptes ; le tableau décrit l’organisation visée dans les notes et doit être rapproché de l’annuaire réel.
 
 ## 4. Justification de la méthode
 
@@ -36,7 +38,7 @@ Cette logique permet d'éviter les comptes inutilisés, les erreurs d'organisati
 ## 5. Procédure de création (exemple : Thomas Moreau)
 
 1. Ouvrir la console **Utilisateurs et ordinateurs Active Directory**.
-2. Sélectionner l'OU `Comptabilité`.
+2. Sélectionner l’OU `Comptabilité` avant de lancer l’assistant. La capture actuelle montre au contraire le conteneur par défaut `Users` ; le placement de l’objet doit donc être contrôlé.
 3. Cliquer avec le bouton droit > **Nouveau** > **Utilisateur**.
 4. Saisir les informations du compte :
    - prénom : `Thomas`
@@ -44,8 +46,8 @@ Cette logique permet d'éviter les comptes inutilisés, les erreurs d'organisati
    - nom d'ouverture de session : `tmoreau`
 5. Définir un mot de passe initial conforme à la politique du laboratoire.
 6. Valider la création du compte.
-7. Vérifier le statut du compte dans les propriétés, car il peut être initialement désactivé.
-8. Dans l'onglet **Compte**, décocher l'option **Le compte est désactivé** si nécessaire.
+7. Vérifier l’état du compte dans ses propriétés avant tout test ; la capture conservée ne montre pas ce paramètre.
+8. Ne modifier l’état actif/désactivé que si cela correspond au besoin du laboratoire et à la procédure autorisée.
 
 Cette étape doit être répétée pour chaque nouvel employé, en suivant les mêmes bonnes pratiques de gestion des identités.
 
@@ -59,8 +61,10 @@ Cette étape doit être répétée pour chaque nouvel employé, en suivant les m
 
 ## 7. Résultat obtenu
 
-Les comptes utilisateurs de l'environnement sont désormais créés et correctement rattachés à leur service respectif. Les identités de l'entreprise sont centralisées dans Active Directory, ce qui permet de passer à la phase suivante de la mise en place des groupes, des autorisations et des contrôles d'accès.
+La capture confirme l’existence de l’objet Thomas Moreau, mais pas son placement dans l’OU attendue. Les autres comptes et leur rattachement sont rapportés dans les notes, sans preuve individuelle complète dans les captures conservées. Vérifier les emplacements et l’état des comptes dans AD avant d’affirmer que la structure est conforme.
 
 ## 8. Conclusion
 
 La gestion des utilisateurs est une étape fondamentale dans la préparation d'un environnement AD sécurisé. Elle permet non seulement d'identifier les employés, mais aussi de structurer les services, d'optimiser les autorisations et d'aligner l'annuaire sur l'organisation réelle de l'entreprise.
+
+[OU](organizational-units.md) · [Groupes](security-groups.md) · [Retour à l’index](../README.md)

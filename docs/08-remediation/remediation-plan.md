@@ -1,10 +1,12 @@
 # Plan de remédiation
 
+[Accueil du laboratoire](../README.md) · [Accueil du dépôt](../../README.md)
+
 ## 1. Objectif et périmètre
 
 Ce document décrit le processus de traitement des constats de sécurité de l'infrastructure Active Directory TechCorp (`lab.local`). Il couvre le contrôleur de domaine `SRV-DC01`, les services DNS, les mécanismes d'authentification et les contrôles d'accès, conformément au périmètre défini dans la [méthodologie d'audit](../07-security-audit/audit-methodology.md).
 
-Le plan d'action reste préparatoire : la méthodologie et les résultats de l'audit indiquent que les tests sont en attente de la résolution des contraintes de connectivité du laboratoire. Aucun constat confirmé n'est donc déclaré dans ce document. Les actions conditionnelles ci-dessous ne signifient pas que les vulnérabilités correspondantes ont été observées.
+Le plan d’action reste préparatoire : l’audit actif n’est pas terminé et aucune vulnérabilité n’est confirmée. Des observations opérationnelles et des écarts entre notes et captures sont consignés dans les [constats](../07-security-audit/security-findings.md) ; ils doivent être reproduits et qualifiés avant de devenir des remédiations de sécurité.
 
 ## 2. Priorisation
 
@@ -25,6 +27,7 @@ Une priorité ne doit être attribuée qu'à un constat documenté et confirmé.
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | PR-01 | Rétablir et vérifier la connectivité isolée entre la machine d'audit et le réseau `labnet`, puis consigner la configuration retenue. | Prérequis signalé dans la méthodologie d'audit. | Prérequis | Administrateur du laboratoire | Avant la reprise des tests | Bloqué — connectivité à résoudre |
 | PR-02 | Réaliser les contrôles autorisés du périmètre et joindre les commandes, résultats et horodatages aux résultats d'audit. | Après levée du blocage PR-01. | Prérequis | Auditeur | Après PR-01 | En attente |
+| PR-03 | Reproduire l’échec DNS/DC locator de `dcdiag` et corréler les adresses DNS de `SRV-DC01` avec ses interfaces, notamment l’adresse `10.0.3.15` visible sur capture. | OBS-01 et OBS-02 des [constats](../07-security-audit/security-findings.md). | Investigation | Administrateur AD/DNS | Avant clôture du diagnostic | Ouvert |
 | RM-01 | Enregistrer chaque faiblesse confirmée dans le registre des constats avec preuve, système concerné, impact, priorité et recommandation. | Tout écart vérifié lors de l'audit. | Selon constat | Auditeur | À la clôture de l'analyse du constat | En attente |
 | RM-02 | Corriger les paramètres de comptes, de mots de passe ou de verrouillage uniquement si les tests démontrent un écart par rapport aux exigences retenues. | Résultats des tests d'authentification et examen des stratégies appliquées. | Selon constat | Administrateur Active Directory | À définir après confirmation | Conditionnel |
 | RM-03 | Réviser les autorisations de partage et NTFS, retirer les accès non justifiés et vérifier les accès avec des comptes représentatifs. | Écart confirmé entre les droits effectifs et les besoins métier. | Selon constat | Administrateur des systèmes / propriétaire des données | À définir après confirmation | Conditionnel |
@@ -56,4 +59,6 @@ Le plan pourra être déclaré terminé lorsque :
 
 ## 6. Statut actuel
 
-**En préparation — audit non clôturé.** La connectivité du réseau d'audit doit être rétablie avant de pouvoir établir des constats vérifiés et fixer les priorités et échéances de remédiation. Aucune vulnérabilité n'est déclarée comme confirmée dans le présent plan.
+**En préparation — audit non clôturé.** La connectivité depuis Kali vers le réseau interne reste à établir ; indépendamment de ce blocage, un échec DNS/DC locator est visible dans une capture du contrôleur et doit être reproduit. Aucune vulnérabilité n’est déclarée comme confirmée dans le présent plan.
+
+[Méthodologie](../07-security-audit/audit-methodology.md) · [Résultats](../07-security-audit/audit-results.md) · [Retour à l’index](../README.md)
