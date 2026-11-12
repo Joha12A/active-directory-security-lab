@@ -106,3 +106,4 @@ La capture suivante montre les VMs enregistrées dans VirtualBox. Ubuntu est arr
 ## Limites et contributions
 
 Le fichier [LICENSE](LICENSE) est actuellement vide : les conditions de réutilisation ne sont pas définies. Aucun type de licence n’est choisi dans ce travail. Les répertoires locaux `configs/` et `audit-reports/` ne contiennent aucun fichier suivi par Git ; ils ne sont donc pas présentés comme des livrables disponibles.
+
